@@ -7,6 +7,7 @@ varying only two parameters: the coefficient of relative risk aversion and a sca
 factor for an age-varying sequence of discount factors.  The estimation uses a
 consumption-saving model with idiosyncratic shocks to permanent and transitory
 income as defined in ConsIndShockModel.
+
 '''
 # Import the HARK library.  The assumption is that this code is in a folder
 # contained in the HARK folder. 
@@ -104,7 +105,7 @@ empirical_weights = Data.empirical_weights
 empirical_groups = Data.empirical_groups
 
 unique_group_numbers = np.unique(empirical_groups)
-count_per_group = [np.sum(empirical_groups == n) for n in unique_group_numbers]
+count_per_group = [np.sum(empirical_weights[empirical_groups == n]) for n in unique_group_numbers]
 total_count_obs = np.sum(count_per_group)
 
 N_values_per_group = {}
@@ -271,16 +272,23 @@ def smmObjectiveFxn(DiscFacAdj, CRRA,
 
 
 
+
 # Make a single-input lambda function for use in the optimizer
 smmObjectiveFxnReduced = lambda parameters_to_estimate : smmObjectiveFxn(DiscFacAdj=parameters_to_estimate[0],CRRA=parameters_to_estimate[1])
 
 smmObjectiveFxnReduced_check_phi = lambda parameters_to_estimate : smmObjectiveFxn(DiscFacAdj=parameters_to_estimate[0],CRRA=parameters_to_estimate[1], return_phi=True)
 
 if __name__ == '__main__':
-    initial_guess = [Params.DiscFacAdj_start,Params.CRRA_start]
-    print('Now estimating the model using Nelder-Mead from an initial guess of' + str(initial_guess) + '...')
-    model_estimate = minimizeNelderMead(smmObjectiveFxnReduced,initial_guess,verbose=True)
-    print('Estimated values: DiscFacAdj=' + str(model_estimate[0]) + ', CRRA=' + str(model_estimate[1]))
+    from time import time
+    opt=False
+    if opt:
+        initial_guess = [Params.DiscFacAdj_start,Params.CRRA_start]
+        print('Now estimating the model using Nelder-Mead from an initial guess of' + str(initial_guess) + '...')
+        model_estimate = minimizeNelderMead(smmObjectiveFxnReduced,initial_guess,verbose=True)
+        print('Estimated values: DiscFacAdj=' + str(model_estimate[0]) + ', CRRA=' + str(model_estimate[1]))
+    else:
+        # must be manual
+        model_estimate = [1.00886938188, 2.7484689884]
 
     check_output = True
     if check_output:
@@ -293,7 +301,42 @@ if __name__ == '__main__':
         phi_empiric_pool2 = np.reshape(phi_empiric_pool2, (7,4))
 
 
+    make_contour_plot = True
+    if make_contour_plot:
+        grid_density = 10   # Number of parameter values in each dimension
+        level_count = 100   # Number of contour levels to plot
+        #DiscFacAdj_list = np.linspace(0.9,1.05,grid_density)
+        #CRRA_list = np.linspace(2,8,grid_density)
 
+        DiscFacAdj_list = np.linspace(1.002,1.007,grid_density)
+        CRRA_list = np.linspace(2.7,2.8,grid_density)
+
+        CRRA_mesh, DiscFacAdj_mesh = pylab.meshgrid(CRRA_list,DiscFacAdj_list)
+        smm_obj_levels = np.empty([grid_density,grid_density])
+        t0=time()
+        for j in range(grid_density):
+            DiscFacAdj = DiscFacAdj_list[j]
+            for k in range(grid_density):
+                CRRA = CRRA_list[k]
+                smm_obj_levels[j,k] = smmObjectiveFxn(DiscFacAdj,CRRA) 
+        t1=time()  
+        print("took: ", (t1-t0)/60.0, " min")
+        smm_contour = pylab.contourf(CRRA_mesh,DiscFacAdj_mesh,smm_obj_levels,level_count)
+        pylab.colorbar(smm_contour)
+        
+        myshape=smm_obj_levels.shape
+        z=np.unravel_index(np.argmin(smm_obj_levels),myshape)
+
+        model_estimate2=[DiscFacAdj_mesh[z], CRRA_mesh[z]]
+
+        pylab.plot(model_estimate2[1],model_estimate2[0],'*r',ms=15)
+        pylab.xlabel(r'coefficient of relative risk aversion $\rho$',fontsize=14)
+        pylab.ylabel(r'discount factor adjustment $\beth$',fontsize=14)
+        pylab.savefig('SMMcontour7.pdf')
+        pylab.savefig('SMMcontour7.png')
+        pylab.show()
+
+        print("Model est from grid:", model_estimate2) 
 
 
 
