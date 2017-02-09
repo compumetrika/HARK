@@ -1,0 +1,19 @@
+In [1]: run StructEstimation_quantile_try
+divide by zero encountered in log
+using a non-integer number instead of an integer will result in an error in the future
+For age group, 1.0 N obs = 772
+For age group, 2.0 N obs = 1093
+For age group, 3.0 N obs = 1483
+For age group, 4.0 N obs = 1740
+For age group, 5.0 N obs = 1917
+For age group, 6.0 N obs = 1836
+For age group, 7.0 N obs = 1634
+Now estimating the model using Nelder-Mead from an initial guess of[0.99, 4.0]...
+All-NaN axis encountered
+Optimization terminated successfully.
+         Current function value: 120255.501753
+         Iterations: 82
+         Function evaluations: 154
+Time to estimate is 108.506961107 seconds.
+Estimated values: DiscFacAdj=1.00886991221, CRRA=2.74853373721
+

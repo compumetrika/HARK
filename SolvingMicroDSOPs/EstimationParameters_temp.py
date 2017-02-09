@@ -63,10 +63,9 @@ DiscFac_timevary = [1.064914 ,  1.057997 ,  1.051422 ,  1.045179 ,  1.039259 ,
         0.9902111,  0.9902111,  0.9902111,  0.9902111,  0.9902111]
 
 # Now...let's set a single value for the entire time range: 
-#temp_n = len(DiscFac_timevary)
-#ave_DiscFac = sum(DiscFac_timevary) / float(temp_n)
-#DiscFac_timevary = [1.0] * temp_n
-
+temp_n = len(DiscFac_timevary)
+ave_DiscFac = sum(DiscFac_timevary) / float(temp_n)
+DiscFac_timevary = [1.0] * temp_n
 
 # Survival probabilities over the lifecycle, starting from age 25
 LivPrb = [ 1.        ,  1.        ,  1.        ,  1.        ,  1.        ,
